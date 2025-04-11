@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Forecasting Tool</title>
+    <!-- Link to the CSS file -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Sales Forecasting Tool</h1>
+        <form id="prediction-form">
+            <label for="Quantity_Lag1">Quantity Sold 1 Day Ago:</label>
+            <input type="number" step="any" id="Quantity_Lag1" name="Quantity_Lag1" required>
+
+            <label for="Quantity_Lag7">Quantity Sold 7 Days Ago:</label>
+            <input type="number" step="any" id="Quantity_Lag7" name="Quantity_Lag7" required>
+
+            <button type="submit">Predict Sales</button>
+        </form>
+
+        <div id="result" class="hidden">
+            <h2>Predicted Sales:</h2>
+            <p id="predicted-sales"></p>
+        </div>
+    </div>
+
+    <script>
+        // Handle form submission via JavaScript
+        document.getElementById('prediction-form').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent default form submission
+
+            // Collect input values
+            const formData = new FormData();
+            formData.append('Quantity_Lag1', document.getElementById('Quantity_Lag1').value);
+            formData.append('Quantity_Lag7', document.getElementById('Quantity_Lag7').value);
+
+            // Send POST request to Flask server
+            fetch('/predict', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(`Error: ${data.error}`);
+                } else {
+                    // Display the prediction result
+                    document.getElementById('predicted-sales').textContent = data.Predicted_Sales;
+                    document.getElementById('result').classList.remove('hidden');
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    </script>
+</body>
+</html>
