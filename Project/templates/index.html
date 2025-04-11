@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Forecasting Tool</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Sales Forecasting Tool</h1>
+
+        <!-- Input Section -->
+        <section class="input-section">
+            <!-- Weekly Quantity Data Sold -->
+            <div class="input-box weekly-box">
+                <h3>Weekly Quantity Data Sold</h3>
+                <label for="Quantity_Lag1">Quantity Sold 1 Week Ago:</label>
+                <input type="number" step="any" id="Quantity_Lag1" name="Quantity_Lag1" required>
+
+                <label for="Quantity_Lag4">Quantity Sold 4 Weeks Ago:</label>
+                <input type="number" step="any" id="Quantity_Lag4" name="Quantity_Lag4" required>
+
+                <label for="Quantity_Lag8">Quantity Sold 8 Weeks Ago:</label>
+                <input type="number" step="any" id="Quantity_Lag8" name="Quantity_Lag8" required>
+            </div>
+
+            <!-- Quarterly Quantity Data Sold -->
+            <div class="input-box quarterly-box">
+                <h3>Quarterly Quantity Data Sold</h3>
+                <label for="Quantity_Lag12">Quantity Sold 12 Weeks Ago:</label>
+                <input type="number" step="any" id="Quantity_Lag12" name="Quantity_Lag12" required>
+            </div>
+
+            <!-- Annual Quantity Data Sold -->
+            <div class="input-box annual-box">
+                <h3>Annual Quantity Data Sold</h3>
+                <label for="Quantity_Lag52">Quantity Sold 52 Weeks Ago:</label>
+                <input type="number" step="any" id="Quantity_Lag52" name="Quantity_Lag52" required>
+            </div>
+        </section>
+
+        <!-- Prediction Section -->
+        <section class="prediction-section">
+            <div class="prediction-box">
+                <h3>Predicted Quantity of Goods</h3>
+                <p id="predicted-sales">Enter data and click "Predict Sales" to see the result.</p>
+                <button id="predict-button">Predict Sales</button>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        document.getElementById('predict-button').addEventListener('click', function(event) {
+            event.preventDefault(); // Prevent default form submission
+
+            // Collect input values
+            const formData = new FormData();
+            formData.append('Quantity_Lag1', document.getElementById('Quantity_Lag1').value);
+            formData.append('Quantity_Lag4', document.getElementById('Quantity_Lag4').value);
+            formData.append('Quantity_Lag8', document.getElementById('Quantity_Lag8').value);
+            formData.append('Quantity_Lag12', document.getElementById('Quantity_Lag12').value);
+            formData.append('Quantity_Lag52', document.getElementById('Quantity_Lag52').value);
+
+            // Send POST request to Flask server
+            fetch('/predict', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.error) {
+                    alert(`Error: ${data.error}`);
+                } else {
+                    // Display the prediction result
+                    document.getElementById('predicted-sales').textContent = `Predicted Quantity: ${data.Predicted_Quantity}`;
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    </script>
+</body>
+</html>
